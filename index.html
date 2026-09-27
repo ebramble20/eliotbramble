@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eliot Bramble — Drawings</title>
+<meta name="description" content="Cross-section drawings by Eliot Bramble.">
+
+<!--
+  HOW TO ADD YOUR DRAWINGS
+  ========================
+  1. Put your image files in an /images folder next to this file,
+     e.g. images/plate-01.webp (thumbnail ~800px wide)
+          images/plate-01-full.webp (full view ~2000px wide)
+  2. Find the <figure class="plate"> blocks below. For each one:
+       - set src to the thumbnail
+       - set data-full to the full-size image
+       - set alt to a short description of the drawing
+       - edit the caption title
+  3. Duplicate a <figure> block for each new drawing.
+  Delete or add blocks freely — the layout adapts.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #F2EDE1;
+    --ink: #1C1C1A;
+    --graphite: #8B8B85;
+    --hairline: #E4E4DF;
+    --seal: #C43E2F; /* used once: the artist's mark */
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 28px 40px;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 22px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .wordmark .mark { color: var(--seal); }
+  nav a {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin-left: 28px;
+    color: var(--graphite);
+    transition: color 160ms ease;
+  }
+  nav a:hover { color: var(--ink); }
+
+  /* ---------- intro ---------- */
+  .intro {
+    max-width: 640px;
+    margin: 10vh auto 12vh;
+    padding: 0 40px;
+    text-align: center;
+  }
+  .intro h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.2;
+  }
+  .intro p {
+    margin-top: 16px;
+    color: var(--graphite);
+    font-size: 13px;
+  }
+
+  /* ---------- plates ---------- */
+  .plates {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 40px 8vh;
+  }
+
+  .plate {
+    margin: 0 0 12vh;
+    max-width: 640px;
+  }
+  /* book-like rhythm: alternate plates drift left / right on wide screens */
+  @media (min-width: 900px) {
+    .plate:nth-child(odd)  { margin-right: auto; }
+    .plate:nth-child(even) { margin-left: auto; }
+  }
+
+  .plate button {
+    display: block;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: zoom-in;
+  }
+  .plate img, .plate svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 220ms ease;
+  }
+  .plate button:hover img,
+  .plate button:hover svg { transform: translateY(-3px); }
+
+  /* caption drawn like a diagram annotation: leader line + label */
+  figcaption {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  figcaption::before {
+    content: "";
+    width: 32px;
+    height: 1px;
+    background: var(--ink);
+    align-self: center;
+    flex-shrink: 0;
+  }
+  figcaption .num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--graphite);
+  }
+  figcaption .title {
+    font-family: var(--serif);
+    font-size: 17px;
+  }
+
+  /* ---------- assembly ---------- */
+  .assembly {
+    margin: 0 auto 12vh;
+    padding: 0 24px;
+  }
+  .stage {
+    position: relative;
+    /* 1183 x 446 native; fills the window, capped at 2x */
+    width: min(100%, 2366px);
+    aspect-ratio: 1183 / 446;
+    margin: 0 auto;
+    transform-origin: center center;
+    transition: transform 900ms cubic-bezier(.65,.02,.28,1);
