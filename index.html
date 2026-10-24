@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eliot Bramble — Drawings</title>
+<meta name="description" content="Cross-section drawings by Eliot Bramble">
+
+<!--
+  HOW TO ADD YOUR DRAWINGS
+  ========================
+  1. Put your image files in an /images folder next to this file,
+     e.g. images/plate-01.webp (thumbnail ~800px wide)
+          images/plate-01-full.webp (full view ~2000px wide)
+  2. Find the <figure class="plate"> blocks below. For each one:
+       - set src to the thumbnail
+       - set data-full to the full-size image
+       - set alt to a short description of the drawing
+       - edit the caption title
+  3. Duplicate a <figure> block for each new drawing.
+  Delete or add blocks freely — the layout adapts.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --paper: #F2EDE1;
+    --ink: #1C1C1A;
+    --graphite: #8B8B85;
+    --hairline: #E4E4DF;
+    --seal: #C43E2F; /* used once: the artist's mark */
+    --serif: "Instrument Serif", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; }
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+
+  /* ---------- header ---------- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 28px 40px;
+  }
+  .wordmark {
+    font-family: var(--serif);
+    font-size: 22px;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .wordmark .mark { color: var(--seal); }
+  nav a {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin-left: 28px;
+    color: var(--graphite);
+    transition: color 160ms ease;
+  }
+  nav a:hover { color: var(--ink); }
+
+  /* ---------- intro ---------- */
+  .intro {
+    max-width: 640px;
+    margin: 10vh auto 12vh;
+    padding: 0 40px;
+    text-align: center;
+  }
+  .intro h1 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.2;
+  }
+  .intro p {
+    margin-top: 16px;
+    color: var(--graphite);
+    font-size: 13px;
+  }
+
+  /* ---------- plates ---------- */
+  .plates {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 40px 8vh;
+  }
+
+  .plate {
+    margin: 0 0 12vh;
+    max-width: 640px;
+  }
+  /* book-like rhythm: alternate plates drift left / right on wide screens */
+  @media (min-width: 900px) {
+    .plate:nth-child(odd)  { margin-right: auto; }
+    .plate:nth-child(even) { margin-left: auto; }
+  }
+
+  .plate button {
+    display: block;
+    width: 100%;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: zoom-in;
+  }
+  .plate img, .plate svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: transform 220ms ease;
+  }
+  .plate button:hover img,
+  .plate button:hover svg { transform: translateY(-3px); }
+
+  /* caption drawn like a diagram annotation: leader line + label */
+  figcaption {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  figcaption::before {
+    content: "";
+    width: 32px;
+    height: 1px;
+    background: var(--ink);
+    align-self: center;
+    flex-shrink: 0;
+  }
+  figcaption .num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--graphite);
+  }
+  figcaption .title {
+    font-family: var(--serif);
+    font-size: 17px;
+  }
+
+  /* ---------- assembly: sets of drawings the viewer slides through ---------- */
+  .assembly {
+    margin: 0 auto 12vh;
+    padding: 0 24px;
+  }
+  .sets {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    /* each set keeps its own height; the track eases to the height of the set in view */
+    align-items: flex-start;
+    transition: height 500ms cubic-bezier(.65,.02,.28,1);
+  }
+  .sets::-webkit-scrollbar { display: none; }
+  .sets:focus-visible { outline: 2px solid var(--ink); outline-offset: 6px; }
+  .set {
+    flex: 0 0 100%;
+    /* snap sideways only; a block-axis snap lets some browsers nudge the track up or down */
+    scroll-snap-align: none center;
+    /* a little room so no wall line sits on the track's clipping edge */
+    padding: 6px 0;
+    scroll-snap-stop: always;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stage {
+    position: relative;
+    margin: 0 auto;
+    transition: transform 900ms cubic-bezier(.65,.02,.28,1);
+  }
+  .stage img {
+    position: absolute;
+    width: auto;
+    /* drawn on a fixed pixel increment — scale without interpolation */
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    transition: transform 900ms cubic-bezier(.65,.02,.28,1);
+  }
+  /* below native width the image must scale down — smooth beats dropped lines */
+  @media (max-width: 1230px) {
+    .stage img { image-rendering: auto; }
+  }
+
+  /* set 1 — the Amalgamated Factory. 1193 x 653 native, with hallways and ladder shafts in the joins;
+     capped at 2x and 85% of the window height */
+  .stage-1 {
+    width: min(100%, 2386px, calc(85vh * 1193 / 653));
+    aspect-ratio: 1193 / 653;
+    transform-origin: center top;
+  }
+  /* separated, the rooms spread 40px further apart — scale to fit */
+  .stage-1[data-state="apart"] { transform: translateY(0.65%) scale(0.93); }
+  .stage-1 .p1 { left: -0.084%; top: -0.153%; width: 52.054%; height: 68.300%; }
+  .stage-1[data-state="apart"] .p1 { transform: translate(-6.441%, 0.000%); }
+  .stage-1 .p2 { left: 43.252%; top: -0.153%; width: 14.334%; height: 68.300%; }
+  .stage-1 .p3 { left: 58.927%; top: -0.153%; width: 43.168%; height: 68.300%; }
+  .stage-1[data-state="apart"] .p3 { transform: translate(7.767%, 0.000%); }
+  .stage-1 .p4 { left: 0.000%; top: 74.273%; width: 100.000%; height: 25.727%; }
+  .stage-1[data-state="apart"] .p4 { transform: translate(0.000%, 23.810%); }
+  .stage-1 .l1 { left: 41.744%; top: 0.000%; width: 1.593%; height: 73.813%; }
+  .stage-1 .l2 { left: 57.418%; top: 0.000%; width: 1.593%; height: 73.813%; }
+  .stage-1 .l3 { left: 0.000%; top: 67.994%; width: 100.000%; height: 6.432%; }
+
+  /* set 2 — the T.S.S. Facility. 1175 x 616 native, with hallways and ladder shafts in the joins;
+     capped at 2x and 85% of the window height */
+  .stage-2 {
+    width: min(100%, 2350px, calc(85vh * 1175 / 616));
+    aspect-ratio: 1175 / 616;
+    transform-origin: center top;
+  }
+  /* separated, the rooms spread 40px further apart — scale to fit */
+  .stage-2[data-state="apart"] { transform: translateY(0.29%) scale(0.88); }
+  .stage-2 .p1 { left: 0.000%; top: 0.000%; width: 100.000%; height: 27.273%; }
+  .stage-2 .p2 { left: 0.000%; top: 33.766%; width: 37.106%; height: 25.162%; }
+  .stage-2[data-state="apart"] .p2 { transform: translate(-9.174%, 25.806%); }
+  .stage-2 .p3 { left: 38.553%; top: 33.766%; width: 61.447%; height: 25.162%; }
+  .stage-2[data-state="apart"] .p3 { transform: translate(5.540%, 25.806%); }
+  .stage-2 .p4 { left: 0.000%; top: 65.422%; width: 100.000%; height: 34.578%; }
+  .stage-2[data-state="apart"] .p4 { transform: translate(0.000%, 37.559%); }
+  .stage-2 .l1 { left: 37.021%; top: 27.435%; width: 1.617%; height: 37.500%; }
+  .stage-2 .l2 { left: 0.000%; top: 27.110%; width: 100.000%; height: 6.818%; }
+  .stage-2 .l3 { left: 0.000%; top: 58.766%; width: 100.000%; height: 6.818%; }
+
+  /* hallways and shafts only exist when the rooms are joined. After the rooms land, each hallway
+     unrolls from its centre and then each shaft extends downward like a ladder being lowered,
+     in whole steps so it reads as being drawn. On Separate they retract first, then the rooms part. */
+  .stage .link { pointer-events: none; transition: clip-path 250ms steps(8, end); }
+  .stage .link-h { clip-path: inset(0 50% 0 50%); }
+  .stage .link-v { clip-path: inset(0 0 100% 0); }
+  .stage[data-state="together"] .link { clip-path: inset(0 0 0 0); }
+  .stage[data-state="together"] .link-h { transition: clip-path 500ms steps(20, end) 900ms; }
+  .stage[data-state="together"] .link-v { transition: clip-path 500ms steps(20, end) 1350ms; }
+  .stage[data-state="apart"],
+  .stage[data-state="apart"] .room { transition-delay: 250ms; }
+
+  /* controls: set counter with arrows, and the join / separate toggle */
+  .assembly-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px 24px;
+    max-width: 880px;
+    margin: 28px auto 0;
+  }
+  .set-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .set-nav .arrow {
+    background: none;
+    border: none;
+    font-family: var(--serif);
+    font-size: 26px;
+    line-height: 1;
+    color: var(--ink);
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: color 160ms ease;
+  }
+  .set-nav .arrow:hover { color: var(--graphite); }
+  .set-nav .arrow:disabled { color: var(--hairline); cursor: default; }
+  .set-label {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    min-width: 0;
+  }
+  .set-label::before {
+    content: "";
+    width: 32px;
+    height: 1px;
+    background: var(--ink);
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .set-label .num {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--graphite);
+    white-space: nowrap;
+  }
+  .set-label .title {
+    font-family: var(--serif);
+    font-size: 17px;
+  }
+  .assembly-bar .join {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid var(--ink);
+    padding: 9px 16px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: background 160ms ease, color 160ms ease;
+  }
+  .assembly-bar .join:hover { background: var(--ink); color: var(--paper); }
+
+  @media (max-width: 600px) {
+    .assembly { padding: 0 16px; }
+    .assembly-bar { justify-content: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stage[data-state="apart"] img { transform: none; }
+    .stage[data-state="apart"] { transform: none; }
+    /* the rooms stay put; hallways and shafts simply fade in and out */
+    .stage .link, .stage[data-state="together"] .link { clip-path: none; transition: opacity 200ms; }
+    .stage[data-state="apart"] .link { opacity: 0; }
+  }
+
+  /* ---------- about ---------- */
+  .about {
+    border-top: 1px solid var(--hairline);
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 10vh 40px 12vh;
+  }
+  .about h2 {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 26px;
+    margin-bottom: 18px;
+  }
+  .about p { color: var(--ink); margin-bottom: 14px; max-width: 52ch; }
+  .about .contact {
+    margin-top: 28px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  footer {
+    text-align: center;
+    padding: 0 40px 40px;
+    color: var(--graphite);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ---------- lightbox ---------- */
+  .lightbox {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 24px 40px;
+    z-index: 10;
+  }
+  .lightbox.open { display: flex; }
+  .lightbox img, .lightbox svg {
+    max-width: min(92vw, 1100px);
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+  }
+  .lightbox figcaption { justify-content: center; }
+  .lightbox .close {
+    position: absolute;
+    top: 20px;
+    right: 28px;
+    background: none;
+    border: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--graphite);
+    cursor: pointer;
+  }
+  .lightbox .close:hover { color: var(--ink); }
+  .lightbox .arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    font-family: var(--serif);
+    font-size: 34px;
+    color: var(--graphite);
+    cursor: pointer;
+    padding: 12px;
+  }
+  .lightbox .arrow:hover { color: var(--ink); }
+  .lightbox .prev { left: 16px; }
+  .lightbox .next { right: 16px; }
+
+  @media (max-width: 600px) {
+    header, .intro, .plates, .about { padding-left: 22px; padding-right: 22px; }
+    .lightbox .arrow { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="wordmark" href="#">Eliot Bramble<span class="mark">.</span></a>
+  <nav>
+    <a href="#assembly">Work</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
+
+<section class="intro">
+  <h1>Cross-sections of buildings inspired by my childhood drawings</h1>
+  <p>Selected work — New York</p>
+</section>
+
+
+
+<section class="assembly" id="assembly" aria-roledescription="carousel" aria-label="Drawings">
+  <div class="sets" tabindex="0" aria-label="Sets of drawings. Swipe or use the arrow keys to move between sets.">
+
+    <div class="set" role="group" aria-roledescription="slide" aria-label="Set 1 of 2: the Amalgamated Factory. Joined, hallways and ladder shafts connect the three buildings and the T.S.S. level."
+         data-title="Amalgamated Factory" data-join="Join the buildings">
+      <div class="stage stage-1" data-state="apart">
+        <img class="room p1" src="left.webp" alt="Cross-section of the left building: kitchens, workshops, stacked living floors and a basement garage.">
+        <img class="room p2" src="mid.webp" alt="Cross-section of the narrow middle tower: a full-height shaft with machinery at its base.">
+        <img class="room p3" src="right.webp" alt="Cross-section of the right building: warren of small rooms, stairs and storage over a lower hall.">
+        <img class="room p4" src="building4-factory.webp" alt="Long base level: T.S.S. tanks and the T.S.S. office on the upper deck, a central gantry, and the F.M. chem tank in the lower hall.">
+        <img class="link link-v l1" src="factory-shaft-1.webp" alt="" aria-hidden="true">
+        <img class="link link-v l2" src="factory-shaft-2.webp" alt="" aria-hidden="true">
+        <img class="link link-h l3" src="factory-hall.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+
+    <div class="set" role="group" aria-roledescription="slide" aria-label="Set 2 of 2: the T.S.S. Facility. Joined, hallways and a ladder shaft connect the levels."
+         data-title="T.S.S. Facility" data-join="Join the rooms">
+      <div class="stage stage-2" data-state="apart">
+        <img class="room p1" src="building4-facility.webp" alt="Long base level: T.S.S. tanks and the T.S.S. office on the upper deck, a central gantry, and the F.M. chem tank in the lower hall.">
+        <img class="room p2" src="level2-office.webp" alt="Trading floor: glass-fronted offices over open desks, a stock ticker running across the room and a clock reading 14:07.">
+        <img class="room p3" src="level2-hall.webp" alt="Machine hall: a distillation column, a press frame, a flooded test pit under a gantry and a two-storey stair tower.">
+        <img class="room p4" src="level3-tunnel-facility.webp" alt="Tunnel: a stopped train, a raised platform with a locomotive, the field office and a crane car, and below them the T.S.S. boring machine cutting into rock with its trailing cars and heavy equipment car.">
+        <img class="link link-v l1" src="facility-shaft.webp" alt="" aria-hidden="true">
+        <img class="link link-h l2" src="facility-hall-1.webp" alt="" aria-hidden="true">
+        <img class="link link-h l3" src="facility-hall-2.webp" alt="" aria-hidden="true">
+      </div>
+    </div>
+
+  </div>
+  <div class="assembly-bar">
+    <div class="set-nav">
+      <button type="button" class="arrow" id="setPrev" aria-label="Previous set">&larr;</button>
+      <p class="set-label" aria-live="polite"><span class="num" id="setNum">01 / 02</span><span class="title" id="setTitle">Amalgamated Factory</span></p>
+      <button type="button" class="arrow" id="setNext" aria-label="Next set">&rarr;</button>
+    </div>
+    <button type="button" class="join" id="assembleBtn" aria-pressed="false">Join the buildings</button>
+  </div>
+</section>
+
+<section class="about" id="about">
+  <h2>About</h2>
+  <p class="contact"><a href="mailto:eliot@blackbird.cc">eliot@blackbird.cc</a></p>
+</section>
+
+<footer>© 2026 Eliot Bramble — all drawings original</footer>
+
+<div class="lightbox" role="dialog" aria-modal="true" aria-label="Drawing viewer">
+  <button class="close" type="button">Close&nbsp;&nbsp;Esc</button>
+  <button class="arrow prev" type="button" aria-label="Previous drawing">&larr;</button>
+  <figure>
+    <div class="lb-media"></div>
+    <figcaption>
+      <span class="num"></span>
+      <span class="title"></span>
+    </figcaption>
+  </figure>
+  <button class="arrow next" type="button" aria-label="Next drawing">&rarr;</button>
+</div>
+
+<script>
+  const plates = Array.from(document.querySelectorAll('.plate'));
+  const lightbox = document.querySelector('.lightbox');
+  const media = lightbox.querySelector('.lb-media');
+  const lbNum = lightbox.querySelector('.num');
+  const lbTitle = lightbox.querySelector('.title');
+  let current = -1;
+  let lastFocused = null;
+
+  function show(i) {
+    current = (i + plates.length) % plates.length;
+    const plate = plates[current];
+    const img = plate.querySelector('img');
+    media.innerHTML = '';
+    if (img) {
+      const full = document.createElement('img');
+      full.src = img.dataset.full || img.src;
+      full.alt = img.alt;
+      media.appendChild(full);
+    } else {
+      media.appendChild(plate.querySelector('svg').cloneNode(true));
+    }
+    lbNum.textContent = plate.querySelector('.num').textContent;
+    lbTitle.textContent = plate.querySelector('.title').textContent;
+  }
+
+  function open(i) {
+    lastFocused = document.activeElement;
+    show(i);
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    lightbox.querySelector('.close').focus();
+  }
+
+  function close() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
+
+  plates.forEach((plate, i) => {
+    plate.querySelector('button').addEventListener('click', () => open(i));
+  });
+  lightbox.querySelector('.close').addEventListener('click', close);
+  lightbox.querySelector('.prev').addEventListener('click', () => show(current - 1));
+  lightbox.querySelector('.next').addEventListener('click', () => show(current + 1));
+  lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+
+  /* ---------- sets of drawings ---------- */
+  const track = document.querySelector('.sets');
+  const sets = Array.from(track.querySelectorAll('.set'));
+  const stages = sets.map((set) => set.querySelector('.stage'));
+  const setPrev = document.getElementById('setPrev');
+  const setNext = document.getElementById('setNext');
+  const setNum = document.getElementById('setNum');
+  const setTitle = document.getElementById('setTitle');
+  const assembleBtn = document.getElementById('assembleBtn');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const pad = (n) => String(n).padStart(2, '0');
+  let currentSet = 0;
+  let joined = false;
+
+  function fitHeight() {
+    track.style.height = sets[currentSet].offsetHeight + 'px';
+  }
+
+  function updateControls() {
+    const set = sets[currentSet];
+    fitHeight();
+    setNum.textContent = pad(currentSet + 1) + ' / ' + pad(sets.length);
+    setTitle.textContent = set.dataset.title;
+    setPrev.disabled = currentSet === 0;
+    setNext.disabled = currentSet === sets.length - 1;
+    assembleBtn.textContent = joined ? 'Separate' : set.dataset.join;
+    assembleBtn.setAttribute('aria-pressed', String(joined));
+  }
+
+  function goTo(i) {
+    i = Math.max(0, Math.min(sets.length - 1, i));
+    track.scrollTo({ left: i * track.clientWidth, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+  }
+
+  // the counter follows the scroll position, so swipes and trackpad scrolls update it too
+  let scrollTick = false;
+  track.addEventListener('scroll', () => {
+    // the track only scrolls sideways; undo any vertical drift that would clip the top wall
+    if (track.scrollTop !== 0) track.scrollTop = 0;
+    if (scrollTick) return;
+    scrollTick = true;
+    requestAnimationFrame(() => {
+      scrollTick = false;
+      const i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== currentSet) { currentSet = i; updateControls(); }
+    });
+  });
+  // keep the current set in view when the window is resized
+  window.addEventListener('resize', () => {
+    track.scrollLeft = currentSet * track.clientWidth;
+    fitHeight();
+  });
+
+  setPrev.addEventListener('click', () => goTo(currentSet - 1));
+  setNext.addEventListener('click', () => goTo(currentSet + 1));
+  track.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); goTo(currentSet - 1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentSet + 1); }
+  });
+
+  // joining applies to every set, so the next set arrives in the same state
+  assembleBtn.addEventListener('click', () => {
+    joined = !joined;
+    stages.forEach((stage) => { stage.dataset.state = joined ? 'together' : 'apart'; });
+    updateControls();
+  });
+
+  updateControls();
+
+  document.addEventListener('keydown', (e) => {
+    if (!lightbox.classList.contains('open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') show(current - 1);
+    if (e.key === 'ArrowRight') show(current + 1);
+  });
+</script>
+
+</body>
+</html>
